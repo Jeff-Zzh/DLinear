@@ -41,6 +41,9 @@ class Model(nn.Module):
     DLinear
     """
     def __init__(self, configs):
+        '''
+        configs形参接收的实参为：self.args，即run_longExp.py中的命令行参数类型argparse.Namespace
+        '''
         super(Model, self).__init__()
         self.seq_len = configs.seq_len
         self.pred_len = configs.pred_len

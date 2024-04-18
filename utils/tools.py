@@ -6,14 +6,14 @@ import time
 plt.switch_backend('agg')
 
 
-def adjust_learning_rate(optimizer, epoch, args):
+def adjust_learning_rate(optimizer, epoch, args): # 调整学习率
     # lr = args.learning_rate * (0.2 ** (epoch // 2))
     if args.lradj == 'type1':
         lr_adjust = {epoch: args.learning_rate * (0.5 ** ((epoch - 1) // 1))}
     elif args.lradj == 'type2':
         lr_adjust = {
             2: 5e-5, 4: 1e-5, 6: 5e-6, 8: 1e-6,
-            10: 5e-7, 15: 1e-7, 20: 5e-8
+            10: 5e-7, 15: 1e-7, 20: 5e-8 # echo 次数越大， learning_rate越小（每次把learning_rate除2）
         }
     elif args.lradj == '3':
         lr_adjust = {epoch: args.learning_rate if epoch < 10 else args.learning_rate*0.1}
@@ -58,7 +58,7 @@ class EarlyStopping:
     def save_checkpoint(self, val_loss, model, path):
         if self.verbose:
             print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
-        torch.save(model.state_dict(), path + '/' + 'checkpoint.pth')
+        torch.save(model.state_dict(), path + '/' + 'checkpoint.pth') # 存模型
         self.val_loss_min = val_loss
 
 

@@ -80,9 +80,10 @@ parser.add_argument('--test_flop', action='store_true', default=False, help='See
 
 args = parser.parse_args()
 
-args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False
+# 在这一步use_gpu参数会被设为False
+args.use_gpu = True if torch.cuda.is_available() and args.use_gpu else False # 命令行指定用gpu，并且torch framework觉得跑当前程序的DUT的cuda是能用的，才把该标志位设为True
 
-if args.use_gpu and args.use_multi_gpu:
+if args.use_gpu and args.use_multi_gpu: # 多GPU training/inference情况
     args.dvices = args.devices.replace(' ', '')
     device_ids = args.devices.split(',')
     args.device_ids = [int(id_) for id_ in device_ids]
@@ -91,11 +92,11 @@ if args.use_gpu and args.use_multi_gpu:
 print('Args in experiment:')
 print(args)
 
-Exp = Exp_Main
+Exp = Exp_Main # 类赋值，真正执行实验的类， 后面实例化它去执行实验
 
-if args.is_training:
+if args.is_training: # 训练training
     for ii in range(args.itr):
-        # setting record of experiments
+        # setting record of experiments setting str记录命令行参数, setting将作为模型参数存储路径的一部分
         setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}'.format(
             args.model_id,
             args.model,
@@ -121,12 +122,13 @@ if args.is_training:
         print('>>>>>>>testing : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
         exp.test(setting)
 
-        if args.do_predict:
+        if args.do_predict: # 若指定该参数，则predict unseen future data
             print('>>>>>>>predicting : {}<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'.format(setting))
             exp.predict(setting, True)
 
         torch.cuda.empty_cache()
-else:
+
+else: # 推理 inference
     ii = 0
     setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}'.format(args.model_id,
                                                                                                   args.model,

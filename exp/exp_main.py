@@ -23,13 +23,16 @@ class Exp_Main(Exp_Basic):
         super(Exp_Main, self).__init__(args)
 
     def _build_model(self):
-        model_dict = {
+        model_dict = { # 键是模型名称，值是模型类
             'Autoformer': Autoformer,
             'Transformer': Transformer,
             'Informer': Informer,
             'DLinear': DLinear,
         }
-        model = model_dict[self.args.model].Model(self.args).float()
+        # 根据scripts/EXP-LongForecasting/DLinear/exchange_rate.sh中的命令行参数--model去build_model到指定device上
+        # 调用所选模型类的构造函数 Model(self.args) 来创建模型实例。最后，通过 .float() 方法将模型转换为浮点类型
+        model = model_dict[self.args.model].Model(self.args).float() # Model构造函数在：models/DLinear.py
+        # .float() 将张量或模型参数的数据类型转换为 32 位浮点类型（FP32）
 
         if self.args.use_multi_gpu and self.args.use_gpu:
             model = nn.DataParallel(model, device_ids=self.args.device_ids)
@@ -39,15 +42,18 @@ class Exp_Main(Exp_Basic):
         data_set, data_loader = data_provider(self.args, flag)
         return data_set, data_loader
 
-    def _select_optimizer(self):
-        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate)
+    def _select_optimizer(self): # 选择优化器
+        model_optim = optim.Adam(self.model.parameters(), lr=self.args.learning_rate) # 使用的是 Adam 优化器
         return model_optim
 
-    def _select_criterion(self):
-        criterion = nn.MSELoss()
+    def _select_criterion(self): # 选择损失函数
+        criterion = nn.MSELoss() # 均方误差损失函数（MSELoss）
         return criterion
 
     def vali(self, vali_data, vali_loader, criterion):
+        '''
+         在验证集上进行验证，并返回验证集上的损失
+        '''
         total_loss = []
         self.model.eval()
         with torch.no_grad():
@@ -94,18 +100,21 @@ class Exp_Main(Exp_Basic):
         return total_loss
 
     def train(self, setting):
+        '''
+        训练模型的方法，接收一个 setting 参数作为模型参数存储路径的一部分，并返回训练好的模型
+        '''
         train_data, train_loader = self._get_data(flag='train')
         vali_data, vali_loader = self._get_data(flag='val')
         test_data, test_loader = self._get_data(flag='test')
 
-        path = os.path.join(self.args.checkpoints, setting)
+        path = os.path.join(self.args.checkpoints, setting) # 存模型参数的path默认为./checkpoints/ + 命令行参数字符串
         if not os.path.exists(path):
             os.makedirs(path)
 
         time_now = time.time()
 
         train_steps = len(train_loader)
-        early_stopping = EarlyStopping(patience=self.args.patience, verbose=True)
+        early_stopping = EarlyStopping(patience=self.args.patience, verbose=True) # 存模型的逻辑在EarlyStopping类function中
 
         model_optim = self._select_optimizer()
         criterion = self._select_criterion()
@@ -187,7 +196,7 @@ class Exp_Main(Exp_Basic):
 
             print("Epoch: {0}, Steps: {1} | Train Loss: {2:.7f} Vali Loss: {3:.7f} Test Loss: {4:.7f}".format(
                 epoch + 1, train_steps, train_loss, vali_loss, test_loss))
-            early_stopping(vali_loss, self.model, path)
+            early_stopping(vali_loss, self.model, path) # 该类对象重写了call方法，这样去初始化类，相当于调用了对应逻辑，其中包含save_checkpoint方法，存模型.pth的逻辑
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
@@ -200,6 +209,13 @@ class Exp_Main(Exp_Basic):
         return self.model
 
     def test(self, setting, test=0):
+        '''
+        Args:
+            setting: 命令行参数存成的字符串，是模型参数存储路径的一部分
+            test: test=1 时才load模型参数
+        在测试集上进行测试，并返回评估指标，如均方误差（MSE）、平均绝对误差（MAE）、相关系数等
+        可以设置 test 参数为 1，以加载训练好的模型进行测试。
+        '''
         test_data, test_loader = self._get_data(flag='test')
         
         if test:
@@ -296,6 +312,9 @@ class Exp_Main(Exp_Basic):
         return
 
     def predict(self, setting, load=False):
+        '''
+        预测未来数据
+        '''
         pred_data, pred_loader = self._get_data(flag='pred')
 
         if load:

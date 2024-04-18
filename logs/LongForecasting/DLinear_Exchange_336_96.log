@@ -1,0 +1,25 @@
+Args in experiment:
+Namespace(activation='gelu', batch_size=8, c_out=7, checkpoints='./checkpoints/', d_ff=2048, d_layers=1, d_model=512, data='custom', data_path='exchange_rate.csv', dec_in=7, des='Exp', devices='0,1,2,3', distil=True, do_predict=False, dropout=0.05, e_layers=2, embed='timeF', embed_type=0, enc_in=8, factor=1, features='M', freq='h', gpu=0, individual=False, is_training=1, itr=1, label_len=48, learning_rate=0.0005, loss='mse', lradj='type1', model='DLinear', model_id='Exchange_336_96', moving_avg=25, n_heads=8, num_workers=10, output_attention=False, patience=3, pred_len=96, root_path='./dataset/', seq_len=336, target='OT', test_flop=False, train_epochs=10, use_amp=False, use_gpu=False, use_multi_gpu=False)
+Use CPU
+>>>>>>>start training : Exchange_336_96_DLinear_custom_ftM_sl336_ll48_pl96_dm512_nh8_el2_dl1_df2048_fc1_ebtimeF_dtTrue_Exp_0>>>>>>>>>>>>>>>>>>>>>>>>>>
+train 4880
+val 665
+test 1422
+	iters: 100, epoch: 1 | loss: 0.1205339
+	speed: 0.0343s/iter; left time: 205.7629s
+	iters: 200, epoch: 1 | loss: 0.1142029
+	speed: 0.0258s/iter; left time: 152.0681s
+	iters: 300, epoch: 1 | loss: 0.1050034
+	speed: 0.0232s/iter; left time: 134.6965s
+	iters: 400, epoch: 1 | loss: 0.0451236
+	speed: 0.0228s/iter; left time: 130.2202s
+	iters: 500, epoch: 1 | loss: 0.1270517
+	speed: 0.0222s/iter; left time: 124.5219s
+	iters: 600, epoch: 1 | loss: 0.2508155
+	speed: 0.0215s/iter; left time: 118.3514s
+Epoch: 1 cost time: 15.253838300704956
+Epoch: 1, Steps: 610 | Train Loss: 0.1451684 Vali Loss: 0.2134464 Test Loss: 0.1000851
+Validation loss decreased (inf --> 0.213446).  Saving model ...
+Updating learning rate to 0.0005
+	iters: 100, epoch: 2 | loss: 0.1015611
+	speed: 0.1015s/iter; left time: 547.0125s
