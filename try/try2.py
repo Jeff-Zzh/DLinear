@@ -1,27 +1,34 @@
-from re import X
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
+# from models import DLinear 试试用自己的DLinear
+
 
 class moving_avg(nn.Module):
     """
     Moving average block to highlight the trend of time series
+    计算时间序列的移动平均，以突出时间序列的趋势性
     """
     def __init__(self, kernel_size, stride):
+        '''
+        kernel_size:移动平均的窗口大小
+        stride:步长
+        '''
         super(moving_avg, self).__init__()
-        self.kernel_size = kernel_size
-        self.avg = nn.AvgPool1d(kernel_size=kernel_size, stride=stride, padding=0)
+        self.kernel_size = kernel_size 
+        self.avg = nn.AvgPool1d(kernel_size=kernel_size, stride=stride, padding=0) # 计算一维的平均池化
 
     def forward(self, x):
+        """
+        前向传播方法接受一个输入张量 x，表示输入的时间序列
+        """
         # padding on the both ends of time series
         front = x[:, 0:1, :].repeat(1, (self.kernel_size - 1) // 2, 1)
         end = x[:, -1:, :].repeat(1, (self.kernel_size - 1) // 2, 1)
+        # 将填充后的时间序列传入 nn.AvgPool1d 实例中进行平均池化计算
         x = torch.cat([front, x, end], dim=1)
         x = self.avg(x.permute(0, 2, 1))
         x = x.permute(0, 2, 1)
         return x
-
 
 class series_decomp(nn.Module):
     """
@@ -30,12 +37,18 @@ class series_decomp(nn.Module):
     """
     def __init__(self, kernel_size):
         super(series_decomp, self).__init__()
-        self.moving_avg = moving_avg(kernel_size, stride=1)
+        self.moving_avg = moving_avg(kernel_size, stride=1) # 计算移动平均
 
-    def forward(self, x):
-        moving_mean = self.moving_avg(x)
+    def forward(self, x): 
+        '''
+        前向传播方法
+        接受一个输入张量 x，表示输入的时间序列
+        '''
+        # 首先调用 moving_avg 实例对输入序列进行移动平均计算，得到移动平均值 moving_mean。
+        moving_mean = self.moving_avg(x) 
+        # 计算输入序列 x 与移动平均值之间的残差 res，即原始序列减去移动平均值
         res = x - moving_mean
-        return res, moving_mean
+        return res, moving_mean # 返回元组
 
 class Model(nn.Module):
     """
@@ -88,3 +101,28 @@ class Model(nn.Module):
 
         x = seasonal_output + trend_output
         return x.permute(0,2,1) # to [Batch, Output length, Channel]
+
+class Config:
+    def __init__(self, seq_len, pred_len, individual, enc_in):
+        self.seq_len = seq_len
+        self.pred_len = pred_len
+        self.individual = individual
+        self.enc_in = enc_in
+config = Config(seq_len=336, pred_len=96, individual=False, enc_in=8)
+
+# 定义模型结构
+model = Model(config)
+
+# 加载权重参数
+path = '/home/zzh/zzh/Dlinear02/DLinear/checkpoints/Exchange_336_96_DLinear_custom_ftM_sl336_ll48_pl96_dm512_nh8_el2_dl1_df2048_fc1_ebtimeF_dtTrue_Exp_0/checkpoint.pth'
+checkpoint = torch.load(path)
+
+# 将权重加载到模型中
+model.load_state_dict(checkpoint)
+
+# 将模型设置为评估模式（不使用 dropout 和 batch normalization）
+model.eval()
+
+# 使用模型进行预测或其他操作
+# 例如，如果是分类任务，你可以像这样使用：
+# outputs = model(inputs)
