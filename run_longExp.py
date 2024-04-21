@@ -95,8 +95,8 @@ print(args)
 Exp = Exp_Main # 类赋值，真正执行实验的类， 后面实例化它去执行实验
 
 if args.is_training: # 训练training
-    for ii in range(args.itr):
-        # setting record of experiments setting str记录命令行参数, setting将作为模型参数存储路径的一部分
+    for ii in range(args.itr): # 迭代几次，命令行给定
+        # setting:str记录命令行参数, setting将作为模型超checkpoint.pth参数存储路径的一部分
         setting = '{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_dt{}_{}_{}'.format(
             args.model_id,
             args.model,

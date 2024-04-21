@@ -14,7 +14,7 @@ class moving_avg(nn.Module):
         stride:步长
         '''
         super(moving_avg, self).__init__()
-        self.kernel_size = kernel_size 
+        self.kernel_size = kernel_size
         self.avg = nn.AvgPool1d(kernel_size=kernel_size, stride=stride, padding=0) # 计算一维的平均池化
 
     def forward(self, x):
@@ -39,13 +39,13 @@ class series_decomp(nn.Module):
         super(series_decomp, self).__init__()
         self.moving_avg = moving_avg(kernel_size, stride=1) # 计算移动平均
 
-    def forward(self, x): 
+    def forward(self, x):
         '''
         前向传播方法
         接受一个输入张量 x，表示输入的时间序列
         '''
         # 首先调用 moving_avg 实例对输入序列进行移动平均计算，得到移动平均值 moving_mean。
-        moving_mean = self.moving_avg(x) 
+        moving_mean = self.moving_avg(x)
         # 计算输入序列 x 与移动平均值之间的残差 res，即原始序列减去移动平均值
         res = x - moving_mean
         return res, moving_mean # 返回元组
@@ -59,7 +59,7 @@ class Model(nn.Module):
         configs形参接收的实参为：self.args，即run_longExp.py中的命令行参数类型argparse.Namespace
         '''
         super(Model, self).__init__()
-        self.seq_len = configs.seq_len # 会视窗口大小 default 336 
+        self.seq_len = configs.seq_len # 会视窗口大小 default 336
         self.pred_len = configs.pred_len # 预测窗口大小 96/192/336/720
 
         # Decompsition Kernel Size
@@ -101,28 +101,3 @@ class Model(nn.Module):
 
         x = seasonal_output + trend_output
         return x.permute(0,2,1) # to [Batch, Output length, Channel]
-
-class Config:
-    def __init__(self, seq_len, pred_len, individual, enc_in):
-        self.seq_len = seq_len
-        self.pred_len = pred_len
-        self.individual = individual
-        self.enc_in = enc_in
-config = Config(seq_len=336, pred_len=96, individual=False, enc_in=8)
-
-# 定义模型结构
-model = Model(config)
-
-# 加载权重参数
-path = '/home/zzh/zzh/Dlinear02/DLinear/checkpoints/Exchange_336_96_DLinear_custom_ftM_sl336_ll48_pl96_dm512_nh8_el2_dl1_df2048_fc1_ebtimeF_dtTrue_Exp_0/checkpoint.pth'
-checkpoint = torch.load(path)
-
-# 将权重加载到模型中
-model.load_state_dict(checkpoint)
-
-# 将模型设置为评估模式（不使用 dropout 和 batch normalization）
-model.eval()
-
-# 使用模型进行预测或其他操作
-# 例如，如果是分类任务，你可以像这样使用：
-# outputs = model(inputs)

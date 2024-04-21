@@ -15,7 +15,7 @@ def data_provider(args, flag):
     timeenc = 0 if args.embed != 'timeF' else 1
 
     if flag == 'test':
-        shuffle_flag = False
+        shuffle_flag = False # shuffle：是否打乱数据集
         drop_last = True
         batch_size = args.batch_size
         freq = args.freq
@@ -31,7 +31,7 @@ def data_provider(args, flag):
         batch_size = args.batch_size
         freq = args.freq
 
-    data_set = Data(
+    data_set = Data( # Dataset_Custom
         root_path=args.root_path,
         data_path=args.data_path,
         flag=flag,
@@ -41,7 +41,7 @@ def data_provider(args, flag):
         timeenc=timeenc,
         freq=freq
     )
-    print(flag, len(data_set))
+    print(flag, len(data_set)) # 打印 train 4880     val 665     test 1422
     data_loader = DataLoader(
         data_set,
         batch_size=batch_size,

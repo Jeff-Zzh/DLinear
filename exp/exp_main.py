@@ -52,7 +52,7 @@ class Exp_Main(Exp_Basic):
 
     def vali(self, vali_data, vali_loader, criterion):
         '''
-         在验证集上进行验证，并返回验证集上的损失
+         在验证集上进行验证，并返回验证集上的损失，会在train中被调用
         '''
         total_loss = []
         self.model.eval()
